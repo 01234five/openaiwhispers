@@ -5,10 +5,14 @@ import subprocess
 from subprocess import CalledProcessError
 
 
-def SegmentAudio(_model_path_or_name, _device, _audio_path_or_name):
+def SegmentAudio(
+    _model_path_or_name, _device, _audio_path_or_name, _segment_length_seconds
+):
     print("Load Segment Audio")
     audios = []
-    list_audio_30secs = LoadAudioCustom(_audio_path_or_name, 16000, 25)
+    list_audio_30secs = LoadAudioCustom(
+        _audio_path_or_name, 16000, _segment_length_seconds
+    )
     for audio in list_audio_30secs:
         audios.append(whisper.pad_or_trim(audio))
     model = whisper.load_model(_model_path_or_name, device=_device)
@@ -83,12 +87,16 @@ def FullAudio(_model_path_or_name, _device, _audio_path_or_name):
     print(text)
 
 
-def Main(_model_path_or_name, device, audio_path_or_name, _segmentaudio=False):
+def Main(
+    _model_path_or_name,
+    device,
+    audio_path_or_name,
+    _segmentaudio=False,
+    _segment_length_seconds=25,
+):
     if _segmentaudio:
         SegmentAudio(
-            _model_path_or_name,
-            device,
-            audio_path_or_name,
+            _model_path_or_name, device, audio_path_or_name, _segment_length_seconds
         )
     else:
         FullAudio(_model_path_or_name, device, audio_path_or_name)
