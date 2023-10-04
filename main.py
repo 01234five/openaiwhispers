@@ -5,16 +5,13 @@ import subprocess
 from subprocess import CalledProcessError
 
 
-def SegmentAudio(
-    _device,
-    _audio_path_or_name,
-):
+def SegmentAudio(_model_path_or_name, _device, _audio_path_or_name):
     print("Load Segment Audio")
     audios = []
     list_audio_30secs = LoadAudioCustom(_audio_path_or_name, 16000, 25)
     for audio in list_audio_30secs:
         audios.append(whisper.pad_or_trim(audio))
-    model = whisper.load_model("base", device=_device)
+    model = whisper.load_model(_model_path_or_name, device=_device)
     results = ""
     i = 1
     for chunk in audios:
@@ -72,9 +69,9 @@ def LoadAudioCustom(file: str, sr: int = 16000, segment_length_secs: int = 30):
     return segments
 
 
-def FullAudio(_device, _audio_path_or_name):
+def FullAudio(_model_path_or_name, _device, _audio_path_or_name):
     print("Load Full Audio")
-    model = whisper.load_model("base", device=_device)
+    model = whisper.load_model(_model_path_or_name, device=_device)
     _decode_options = {
         "without_timestamps": True,
         "language": "en",
@@ -86,17 +83,22 @@ def FullAudio(_device, _audio_path_or_name):
     print(text)
 
 
-def Main(device, audio_path_or_name, _segmentaudio=False):
+def Main(_model_path_or_name, device, audio_path_or_name, _segmentaudio=False):
     if _segmentaudio:
-        SegmentAudio(device, audio_path_or_name)
+        SegmentAudio(
+            _model_path_or_name,
+            device,
+            audio_path_or_name,
+        )
     else:
-        FullAudio(device, audio_path_or_name)
+        FullAudio(_model_path_or_name, device, audio_path_or_name)
 
 
 if __name__ == "__main__":
     torch.cuda.is_available()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     audio_path_or_name = "fables_01_00_aesop.mp3"
+    model_path_or_name = "base"
     print("device: " + device)
     print("filename or path: " + audio_path_or_name)
-    Main(device, audio_path_or_name)
+    Main(model_path_or_name, device, audio_path_or_name)
